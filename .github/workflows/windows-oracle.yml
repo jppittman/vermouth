@@ -1,0 +1,52 @@
+# Runs Wine's conformance tests (winetest.exe, built from the vermouth tree)
+# on real x64 Windows, so vermouth can be checked against Windows itself.
+#
+# winetest.exe.xz is committed under oracle/ (about 20 MB). Trigger by hand or
+# by pushing a new bundle; results come back as the "windows-results" artifact.
+name: windows-oracle
+
+on:
+  workflow_dispatch:
+    inputs:
+      tests:
+        description: "Tests to run, e.g. 'gdi32 user32:msg' (empty = all)"
+        required: false
+        default: ""
+  push:
+    paths:
+      - oracle/winetest.exe.xz
+
+jobs:
+  run:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-2025, windows-2022]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: oracle
+
+      - name: Unpack winetest
+        shell: pwsh
+        run: 7z e oracle/winetest.exe.xz -o. -y
+
+      - name: Run conformance tests
+        shell: pwsh
+        run: |
+          $tests = "${{ github.event.inputs.tests }}".Split(" ", [StringSplitOptions]::RemoveEmptyEntries)
+          # -c console, -q quiet, -w per-test timeout; never submit anywhere
+          & .\winetest.exe -c -q -w 300 -t vermouth-oracle -i "${{ matrix.os }}" `
+              -o report.txt -J junit.xml @tests
+          "winetest exit code: $LASTEXITCODE"
+          exit 0
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-results-${{ matrix.os }}
+          path: |
+            report.txt
+            junit.xml
