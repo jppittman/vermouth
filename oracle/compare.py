@@ -17,7 +17,7 @@ from collections import defaultdict
 
 START = re.compile(r"^(\S+:\S+) start ")
 DONE = re.compile(r"^(\S+:\S+?):[0-9a-f]+ done \((-?\d+)\)")
-SUMMARY = re.compile(r"^[0-9a-f]+:(\S+?):[\d.]+ (\d+) tests executed \((\d+) marked as todo, (?:\d+ as flaky, )?(\d+) failures?\)")
+SUMMARY = re.compile(r"^[0-9a-f]+:(\S+?):(?:[\d.]+)? (\d+) tests executed \((\d+) marked as todo, (?:\d+ as flaky, )?(\d+) failures?\)")
 FAILED = re.compile(r"Test failed: (.*)")
 
 
