@@ -15,6 +15,7 @@ on:
   push:
     paths:
       - oracle/winetest.exe.xz
+      - .github/workflows/windows-oracle.yml
 
 jobs:
   run:
@@ -37,8 +38,9 @@ jobs:
         shell: pwsh
         run: |
           $tests = "${{ github.event.inputs.tests }}".Split(" ", [StringSplitOptions]::RemoveEmptyEntries)
-          # -c console, -q quiet, -w per-test timeout; never submit anywhere
-          & .\winetest.exe -c -q -w 300 -t vermouth-oracle -i "${{ matrix.os }}" `
+          # -c console, -q quiet, -w per-test timeout; -o writes the report instead
+          # of submitting it. -m is required for full runs; no report is ever sent.
+          & .\winetest.exe -c -q -w 300 -t vermouth-oracle -i "${{ matrix.os }}" -m nobody@example.invalid `
               -o report.txt -J junit.xml @tests
           "winetest exit code: $LASTEXITCODE"
           exit 0
