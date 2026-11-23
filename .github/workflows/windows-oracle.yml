@@ -32,7 +32,7 @@ jobs:
 
       - name: Unpack winetest
         shell: pwsh
-        run: 7z e oracle/winetest.exe.xz -o. -y
+        run: 7z e oracle/winetest.exe.xz -y
 
       - name: Run conformance tests
         shell: pwsh
